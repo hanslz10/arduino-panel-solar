@@ -1,57 +1,61 @@
+#include <Arduino.h>
 #include <Servo.h>
 
 // put function declarations here:
 Servo servoH;
 Servo servoV;
-int fotoRes1 = A0;
-int LDR;
-int anguloV;
-int anguloH;
+int fr1, fr2, fr3, fr4 = A0, A1, A2, A3; // declaraciones de puertos analogicos a usar por las fotoresistencias
+int LDR1, LDR2, LDR3, LDR4; // declaracion de variables de lectura de fotoresistencias
+int anguloV, anguloH; //declaracion de variables para almacenar los angulos de los servomotores
 
 void setup() 
 {
   // put your setup code here, to run once:
-  pinMode(fotoRes1, INPUT);
-  servoH.attach(9);
-  servoV.attach(6);
+  pinMode(fr1, INPUT); // establecer comportamiendo de los pines analogicos tomados por las fotoresistencias
+  pinMode(fr2, INPUT);
+  pinMode(fr3, INPUT);
+  pinMode(fr4, INPUT);
+  servoH.attach(9); //establece numero de entrada de pin a usar del servomotor horizontal
+  servoV.attach(6); //establece numero de entrada de pin a usar del servomotor vertical
+  servoH.write(90); //establecer posicion inicial de H
+  delay(25);
+  servoV.write(90); //establecer posicion inicial de V
+  delay(25);
   Serial.begin(9600);
 }
 
 void loop() 
 {
   // put your main code here, to run repeatedly:
-  servoH.write(0); //establecer posicion inicial de H
-  delay(25);
-  servoV.write(0); //establecer posicion inicial de V
-  delay(25);
-
   
-  
-  // Dar vuelta entera para analizar el angulo de giro donde menor resistencia haya en la fotoresistencia
-  for (int i = 0; i < 360; i++)
+  for (int i = 0; i < 360; i++) // Dar vuelta entera para analizar el angulo de giro de un servomotor de 360° donde haya menor resistencia o maxima cantidad de luz, 
   {
     servoH.write(i);
-    delay(20); //permite realizar un giro suave y lento
-    anguloH = servoH.read(); //lee los valores de los angulos que tomo el giro del motor en horizontal
-    LDR = analogRead(fotoRes1); //lee la resistencia del fotoresistor
+    delay(20); //permite realizar un giro suave y estable
+    anguloH = servoH.read(); // lectura del angulo del servo, que se guardara en la variable anguloH
+    LDR1 = analogRead(fr1); // lectura de la fotoresistencia, que se guardara en la variable  LDR1
+    LDR2 = analogRead(fr2);
+    LDR3 = analogRead(fr3);
+    LDR4 = analogRead(fr4);
   }
-  delay(100); // tiempo de espera para realizar el siguiente giro del otro servomotor
 
-  // Girar servo VERTICAL a 90 (ya que aun no se como se hace para que gire a 90 en derecha y 90 a izquierda, sin que ocurra un problema con la lectura de angulo y sensores), y analizar donde este la menor resitencia en vertical
-  for (int n = 0; n < 90; n++)
+  
+  for (int n = 0; n < 90; n++) // Girar servo VERTICAL a 90
   {
     servoV.write(n);
-    delay(20);
-    anguloV = servoV.read();
-    LDR = analogRead(fotoRes1);
+    delay(20); //permite realizar un giro suave y estable
+    anguloV = servoV.read();// lectura del angulo del servo, que se guardara en la variable anguloV
+    LDR1 = analogRead(fr1);// lectura de la fotoresistencia, que se guardara en la variable  LDR1
+    LDR2 = analogRead(fr2);
+    LDR3 = analogRead(fr3);
+    LDR4 = analogRead(fr4);
   } 
-  delay(25); // tiempo de espera para que en las siguiente lineas se ejecute el guarado de angulos donde se recibio la menor resistencia
-
-   if (LDR < 700) // condicion cuando se detecte la maxima resistencia
+  
+  int LDRp = (LDR1 + LDR2 + LDR3 + LDR4)/4; //resistencia promedio a partir de las lecturas realizadas que se almacenaron en las variables LDR
+  
+   if (LDRp < 80) // condicion cuando se detecte la minima resistencia promedio y en consecuencia la maxima luz
   {
-    servoH.write(anguloH);
-    delay(25); // tiempo para que no cambien la poscion ambos servomotores a la vez, y no ocurra un problema
-    servoV.write(anguloV);
+    servoH.write(anguloH); //establece la posicion del servomotor horizontal con el angulo donde se encuentre la maxima fuente de luz
+    servoV.write(anguloV); //establece la posicion del servomotor vertical con el angulo donde se encuentre la maxima fuente de luz
   }
-  delay(60000); // tiempo de espera en que se va a quedar en la posicion de maxima luz para que el panel se alimente en ese tiempo
 }
