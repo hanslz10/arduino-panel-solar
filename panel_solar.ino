@@ -4,7 +4,10 @@
 // put function declarations here:
 Servo servoH;
 Servo servoV;
-int fr1, fr2, fr3, fr4 = A0, A1, A2, A3; // declaraciones de puertos analogicos a usar por las fotoresistencias
+int fr1 = A0; // declaraciones de puertos analogicos a usar por las fotoresistencias
+int fr2 = A1; 
+int fr3 = A2;  
+int fr4 = A3; 
 int LDR1, LDR2, LDR3, LDR4; // declaracion de variables de lectura de fotoresistencias
 int anguloV, anguloH; //declaracion de variables para almacenar los angulos de los servomotores
 
